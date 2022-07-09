@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- <style>
+        .article_content{
+            border: 5px outset red;
+            background-color: lightblue;    
+            text-align: center;
+        }
+    </style> -->
+    <title>Display</title>
+</head>
+
+<body class="container my-4 post-wrapper">
+    <div class="text-center my-5">
+        <h1>Pencarian-1 : Pencarian Artikel Menggunakan Kata Kunci</h1>
+        <h6>{{waktu1}} || {{waktu2}} || {{waktu3}} || {{waktu4}}</h6>
+    </div>
+    
+    <p>Artikel yang ditampilkan memiliki subtopik semuanya!</p>
+    <!-- Search Start -->
+    <div class="jumbotron border shadow">
+        <div class="row">
+            <div class="col-md-8 offset-2">
+                <form>
+                    <div class="input-group">
+                        <input id="searchText" name="search" type="text" placeholder="Masukkan Tiga Kata Kunci"
+                        class="form-control form-control-lg"/>
+                        <div class="input-group-append">
+                            <button id="searchBtn" class="btn btn-dark btn-lg" onclick="changeSearchPlaceholder()">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+          </div>
+        </div>
+
+    <div>
+        <!-- {{df|safe}} -->
+    </div>
+    <div>
+        <p>Hasil pencarian "{{kata_kunci}}" terdapat {{jumlah_articles}} dari 114708 hasil</p>
+        
+        <h3>{{checker_msg}}</h3>
+        {% for article in DataFrame.itertuples %}
+            <div class="card my-3">
+                <div class="card-header">
+                    <ul class="nav nav-pills card-header-pills">
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Skor Kemiripan</a>
+                        </li>
+                        <li>
+                            <a class="btn btn-success text-light" role="button">{{article.sim_score_preprocessing}}</a>
+                            <!-- <button type="button" class="btn btn-success">Success</button> -->
+                            <!-- <a class="btn btn-primary">{{article.sim_score_preprocessing}}</a> -->
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Article {{article.id_pub}}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{article.title}}</h6>
+                    <p class="card-text-inline">{{article.title_list}}</p>
+                    <div class="my-2"><a class="card-text-inline" href="{% url 'topic_view'%}"><b>Topik:</b>{{article.topic_name}} || <b>Subtopik:</b>{{article.subtopic_name}}</a></div>
+                    <p class="card-text-inline">{{article.researcher_name}}</p>
+                    <p class="card-text-inline"></p>
+                    <form method="post" action="{% url 'similar' article.id_pub %}">
+                    {% csrf_token %}
+                        <div class="form-check-inline">
+                            <input class="form-check-input" type="checkbox" value="check_topic" name="filtered">
+                            <label class="form-check-label" for="check_topic">Topic</label>
+                        </div>
+                        <div class="form-check-inline">
+                            <input class="form-check-input" type="checkbox" value="check_subtopic" name="filtered">
+                            <label class="form-check-label" for="check_topic">Subtopic</label>
+                        </div>
+                        <div class="form-check-inline">
+                            <input class="form-check-input" type="checkbox" value="check_researcher" name="filtered">
+                            <label class="form-check-label" for="check_topic">Author</label>
+                        </div>
+                        <br><br>
+                        <!-- <a href="{% url 'similar' article.id_pub%}">Yes</a> -->
+                        <div class="text-center">
+                            <button class="btn btn-primary" type="submit">Similar Article</button>
+                        </div>
+                        <!-- <input class="btn btn-primary" name="similar" type="submit" value="Similar Article" onclick="changeSimilarPlaceholder()"> -->
+                    </form>
+                    <!-- <a href="#" class="card-link">Card link</a>
+                    <a href="#" class="card-link">Another link</a> -->
+                </div>
+            </div>
+        {% endfor %} 
+    </div>
+    <script>
+        var getUrlParameter = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+            return false;
+        };
+    </script>
+    <script>
+        function changeSimilarPlaceholder(){
+            var _query = getUrlParameter("similar").replace(/\+/g,' ');
+            document.getElementsByName('similar')[0].placeholder = _query;
+            // selectedTextarea = $('#searchText')[0];
+            // selectedTextarea.placeholder = "this new yeah! ";
+            console.log(_query, selectedTextarea.placeholder); 
+        }
+    </script>
+</body>
+</html>

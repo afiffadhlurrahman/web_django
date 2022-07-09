@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Index HTML</title>
+</head>
+<body>
+    <div class="container my-4 post-wrapper">
+      <h5>Hello Afif!</h5>
+
+      <!-- Search Start -->
+      <div class="jumbotron border shadow">
+      <div class="row">
+          <div class="col-md-8 offset-2">
+              <form>
+                  <div class="input-group">
+                      <input name="search" type="text" placeholder="Search"
+                      class="form-control form-control-lg"/>
+                      <div class="input-group-append">
+                          <button class="btn btn-dark btn-lg">Search</button>
+                      </div>
+                  </div>
+              </form>
+          </div>
+
+        </div>
+      </div>
+      <!-- End Search -->
+
+      </br>
+
+      {% if total_articles > 0 %}
+        <table class="table">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Judul</th>
+                <th scope="col">Topik</th>
+                <th scope="col">Subtopik</th>
+              </tr>
+            </thead>
+            <tbody class="table-body">
+              {% for article in articles %}
+              <tr class='post-box'>
+                <th scope="row">{{ article.id_pub }}</th>
+                <td>{{ article.title }}</td>
+                <td>{{ article.topic.name }}</td>
+                <td>{{ article.subtopic.name }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        {% include "search_page.html" %}
+        <p class="text-center">
+            <button class="btn btn-dark" id="loadmoreBtn">Load More</button>
+        </p>
+      
+      {% else %}
+        <h2>No Results : {{ query }}</h2>
+      {% endif %}
+
+    </div>
+  
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> 
+  <script>
+    var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = window.location.search.substring(1),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+        return false;
+    };
+  </script>
+  <script>
+      $(document).ready(function(){
+          $("#loadmoreBtn").on('click',function(){
+              var _query = getUrlParameter("search").replace(/\+/g,' ');
+              var _queryPage = '1';
+              if(getUrlParameter("page")){
+                  var _queryPage = getUrlParameter("page");   
+              }
+
+              var _currentResult = $(".post-box").length;
+              console.log(_queryPage)
+              
+            //   console.log(getUrlParameter("search"))
+            //   console.log(query)
+            //   console.log(_currentResult)
+              // Run Ajax
+              $.ajax({
+                  url:"{% url 'load-more' %}",
+                  type:'post',
+                  data:{
+                      'offset':_currentResult,
+                      'csrfmiddlewaretoken':"{{csrf_token}}",
+                      'query':_query,
+                      'queryPage':_queryPage,
+                  },
+                  dataType:'json',
+                  beforeSend:function(){
+                      $("#loadmoreBtn").addClass('disabled').text('Loading..');
+                  },
+                  success:function(res){
+                    // console.log(res);
+                    var topicDict = {"1":"Kimia","2":"Industri","3":"Biologi-Tumbuhan","4":"Biologi-Pangan","5":"Mikrobiologi","6":"Studi-Penemuan","7":"Sosial-Masyarakat-Sejarah","8":"Habitat Makhluk Hidup","9":"Elektro-Mesin","10":"Pendidikan","11":"Sosial-Pengaruh","12":"Pertanian","13":"Data-Citra-Statistik","14":"Jawa-Indonesia","15":"Masyarakat","16":"Biokimia","17":"Kesehatan","18":"Kesehatan-penyakit"}
+                    var subtopicDict  = {"1":"Nikel", "2":"Struktur Kimia", "3":"Cairan Kimia", "4":"Studi Zat", "5":"Ion", "6":"Partikel", "7":"Adsorpsi Zat", "8":"Asam", "9":"Nanopartikel", "10":"Sintesis", "11":"Material", "12":"Katalis", "13":"Karbon", "14":"Logam", "15":"Komposit", "16":"Plasma", "17":"Zat Sisa", "18":"Bioprocess", "19":"Sel", "20":"Kitosan", "21":"Pengembangan Daerah", "22":"Faktor-Risiko", "23":"Karakteristik Industri", "24":"Rangcang Strategi", "25":"Harga", "26":"Pelayanan", "27":"Peran Masyarakat", "28":"Sistem Informasi", "29":"Implementasi Strategi", "30":"Optimasi Strategi", "31":"Analisis Data", "32":"Lingkungan", "33":"Evaluasi Produk", "34":"Peraturan/Hukum", "35":"Kebijakan Publik", "36":"Pasar", "37":"Perbankan", "38":"Perusahaan", "39":"Organisasi", "40":"Pekerja", "41":"Antibakteri", "42":"Identifikasi Tumbuhan", "43":"Hama", "44":"Pertumbuhan", "45":"Tumbuhan Herbal", "46":"Rempah", "47":"Faktor Penghambat", "48":"Ekstrak", "49":"Kandungan Tumbuhan", "50":"Daun", "51":"Zat Kimia", "52":"Uji Coba", "53":"Isolat", "54":"Ekstraksi", "55":"Komparasi Tumbuhan", "56":"Asupan Tumbuhan", "57":"Buah", "58":"Minyak", "59":"Enzim", "60":"Sel", "61":"Isolat", "62":"Budidaya", "63":"Benih", "64":"Media Tanam", "65":"Uji Coba", "66":"Kandungan Pangan", "67":"Varietas Pangan", "68":"Padi", "69":"Studi Daerah", "70":"Air", "71":"Pengujian Pangan", "72":"Aplikasi Teknik", "73":"Tanah", "74":"Produksi", "75":"Tanaman", "76":"Genetik", "77":"Bakteri", "78":"Karakteristik Pangan", "79":"Produk Lokal", "80":"Pertumbuhan", "81":"Isolat", "82":"Efek Kimia", "83":"Mikroba", "84":"Gen", "85":"Efek Zat", "86":"Sel", "87":"Asam", "88":"DNA", "89":"Daya Tahan", "90":"Molekul", "91":"Protein", "92":"Aktivitas Zat", "93":"Eksperimen", "94":"Identifikasi Zat", "95":"Ekspresi", "96":"Faktor Pertumbuhan", "97":"Respon Zat", "98":"Virus", "99":"Bakteri", "100":"Reseptor", "101":"Kontrol Produk", "102":"Model Evaluation", "103":"Pngembangan Sistem", "104":"Struktur Alat", "105":"Daya", "106":"Desain Sistem", "107":"Jaringan", "108":"Studi Performa", "109":"Rancang Model", "110":"Nirkabel", "111":"Eksperimen", "112":"Material", "113":"Energi", "114":"Komparasi Teknik", "115":"Optimasi Model", "116":"Komunikasi", "117":"Aplikasi Model", "118":"Antenna", "119":"Mobile", "120":"Frekuensi", "121":"Literasi", "122":"Aktivitas Sosial", "123":"Pola Pikir", "124":"Sistem Informasi", "125":"Studi Daerah", "126":"Pendidikan", "127":"Komunikasi", "128":"Perilaku", "129":"Kompetensi Masyarakat", "130":"Pendidikan", "131":"Budaya", "132":"Kaji Manfaat", "133":"Politik", "134":"Masyarakat", "135":"Model Belajar", "136":"Digitalisasi", "137":"Keterampilan", "138":"Karakter", "139":"Pelajar", "140":"Bahasa", "141":"Karakteristik Area", "142":"Lahan", "143":"Bencana", "144":"Pengembangan Daerah", "145":"Tata Kota", "146":"Arsitektur", "147":"Hayati", "148":"Perkapalan", "149":"Pemodelan", "150":"Uji Coba Teknik", "151":"Polusi", "152":"Citra", "153":"Sistem Analisa", "154":"Evaluasi Daerah", "155":"Studi Daerah", "156":"Perairan", "157":"Perancagan Bangunan", "158":"Konservasi", "159":"Perilaku", "160":"Infrastruktur", "161":"Studi Performa", "162":"Kendaraan", "163":"Kompensator", "164":"Sistem Kontrol", "165":"Distribusi Energi", "166":"Robotik", "167":"Optimasi Model", "168":"Sumber Daya", "169":"Power System", "170":"Aliran Energi", "171":"Sensor", "172":"Aplikaso Model", "173":"Simulasi", "174":"Cairan", "175":"Studi Panas", "176":"Pemodelan", "177":"Pengembangan Model", "178":"Reaktor", "179":"Kelistrikan", "180":"Bahan Bakar", "181":"Literasi", "182":"Perilaku", "183":"Pelajar", "184":"Guru", "185":"Aktivitas Sosial", "186":"Keterampilan", "187":"Pendidikan Indonesia", "188":"Teknologi", "189":"Studi Kasus", "190":"Budaya", "191":"Pengembangan", "192":"Bahasa", "193":"Pendidikan Internasional", "194":"Sains", "195":"Sistem Belajar", "196":"Aplikasi Model", "197":"Konsep Ajar", "198":"Sekolah", "199":"Pengetahuan Umum", "200":"Layanan Pendidikan", "201":"Faktor-Risiko", "202":"Bisnis", "203":"Relasi", "204":"Pekerjaan", "205":"Ekonomi", "206":"Lingkungan", "207":"Sosial", "208":"Usaha", "209":"Pemerintahan", "210":"Kebijakan Publik", "211":"Layanan", "212":"Analisis Data", "213":"Industri", "214":"Syariah", "215":"Manajemen", "216":"Finansial", "217":"Pengembangan Daerah", "218":"Studi Daerah", "219":"Kultur", "220":"Studi Kasus", "221":"Kayu", "222":"Limbah", "223":"Kandungan Produk", "224":"Lahan", "225":"Solusi Pertanian", "226":"Komposit", "227":"Aplikasi Model", "228":"Mekanik", "229":"Ketahanan Pangan", "230":"Karakteristik", "231":"Produksi", "232":"Biomassa", "233":"Pertumbuhan", "234":"Bahan Pertanian", "235":"Perwatan", "236":"Beras", "237":"Zat Kimia", "238":"Minyak", "239":"Ekstraksi", "240":"Studi Performa", "241":"Pengembangan Model", "242":"Jaringan", "243":"Komparasi Model", "244":"Prediksi", "245":"Pengukuran", "246":"Time Series", "247":"Random Process", "248":"Segmentasi", "249":"Komparasi Model", "250":"Regresi", "251":"Komparasi Algortima", "252":"Rekognisi", "253":"Klasifikasi", "254":"Estimasi", "255":"Vector", "256":"Linearitas", "257":"Image", "258":"Logika Sistem", "259":"Pattern", "260":"Data Real-Time", "261":"Karakteristik Daerah", "262":"Analisa Data", "263":"Daerah Tempat Tinggal", "264":"Perkotaan", "265":"Komunitas", "266":"Hutan", "267":"Tumbuhan", "268":"Sulawesi", "269":"Sungai", "270":"Provinsi", "271":"Mapping Daerah", "272":"Perairan", "273":"Pedesaan", "274":"Jawa", "275":"Studi Daerah", "276":"Lahan", "277":"Daerah Tropis", "278":"Kalimantan", "279":"Bahari", "280":"Pesisir", "281":"Pengembangan Daerah", "282":"Perikanan", "283":"Polusi", "284":"Aplikasi Model", "285":"Pertanian", "286":"Kajian Manfaat", "287":"Sumber Daya Daerah", "288":"Ekonomi Masyarakat", "289":"Lingkungan", "290":"Budidaya", "291":"Pemberdayaan Masyarakat", "292":"Peternakan", "293":"Implementasi Teknologi", "294":"Perkampungan", "295":"Kepulauan", "296":"Peningkatan Kualitas Hidup", "297":"Studi Daerah", "298":"Pengelolaan Daerah", "299":"Usaha Masyarakat", "300":"Potensi Daerah", "301":"Ekstraksi", "302":"Proses", "303":"Efek Zat", "304":"Perminyakan", "305":"Pembuatan Bahan", "306":"Sel", "307":"Manfaat Zat", "308":"Studi Kasus", "309":"Limbah", "310":"Protein", "311":"Kadar Zat", "312":"Antioksidan", "313":"Bakteri", "314":"Komposisi", "315":"Konsentrasi", "316":"Sifat Zat", "317":"Tanaman", "318":"Uji Coba Zat", "319":"Karakter Zat", "320":"Bahari", "321":"Kehamilan", "322":"Darah", "323":"Nutrisi", "324":"Kesehatan Masyarakat", "325":"Sel", "326":"Pengobatan", "327":"Suplemen", "328":"Infeksi", "329":"Penyakit Akut", "330":"Dewasa", "331":"Faktor-Risiko", "332":"Penyakit Kronis", "333":"Pasien", "334":"Rumah Sakit", "335":"Pengobatan", "336":"Anak", "337":"Kualitas Hidup", "338":"Pengamatan Klinis", "339":"Prevensi", "340":"Program Kesehatan", "341":"Sanitasi", "342":"Peningkatan Kesehatan", "343":"Lansia", "344":"Layanan Kesehatan", "345":"Pasien", "346":"Pengobatan", "347":"Perilaku", "348":"Gaya Hidup", "349":"Lingkungan Hidup", "350":"Rumah Sakit", "351":"Obat", "352":"Anak", "353":"Pencegahan", "354":"Perilaku", "355":"Faktor-Risiko", "356":"Asupan Gizi", "357":"Program Kesehatan", "358":"Demam Berdarah", "359":"Kesehatan Daerah", "360":"Bayi"}
+          
+                    var _html = '';
+                    var json_data = $.parseJSON(res.articles);
+                    // console.log(json_data)
+                    $.each(json_data,function(index,data){
+                        _html += '<tr  class="post-box"> \
+                                      <th scope="row">' + data.pk + '</th>\
+                                      <td>' + data.fields.title + '</td>\
+                                      <td>' + topicDict[data.fields.topic] + '</td>\
+                                      <td>' + subtopicDict[data.fields.subtopic] + '</td>\
+                                  </tr>';
+                    });
+                    $(".table-body").append(_html);
+                    var _countTotal = $(".post-box").length;
+                    if(_countTotal == res.totalResult){
+                        $("#loadmoreBtn").remove();
+                    }else{
+                        $("#loadmoreBtn").removeClass('disabled').text('Load More');
+                    }
+                  }
+              });
+          });
+      });
+  </script>
+
+</body>
+</html>
