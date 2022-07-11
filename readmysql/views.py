@@ -35,10 +35,11 @@ ARTICLE_PER_PAGE = 5
 
 def highlight_search(t, text):
     search_list = set(t.split()) & set(text.split())
-    for search in list(search_list):
+    same_text = list(search_list)
+    for search in same_text:
         text = text.replace(
             search, '<span class="highlight">{}</span>'.format(search))
-    return text
+    return text, ' '.join(map(str, same_text))
 
 
 def topic_view(request):
@@ -89,6 +90,7 @@ def display_vocab(request):
     if 'search' in request.GET:
         query = request.GET.get('search')
         keyword_case = list(query.split(", "))
+        keyword_case = [x.lower() for x in keyword_case]
 
         frame = pd.read_csv(csvfile2)
         frame = frame.sort_values(by=['df'], ascending=False)
@@ -98,7 +100,7 @@ def display_vocab(request):
                 keyword, regex=False, na=False)][:3]
             dict_hasil_search = pd.concat(
                 [dict_hasil_search, temp], ignore_index=True)
-        # print(dict_hasil_search)
+
         endtime1 = datetime.now()
         temp_list = []
         idpub_list_all = []
@@ -134,12 +136,15 @@ def display_vocab(request):
         temp_df.reset_index(inplace=True, drop=True)
         if len(temp_df) < 1:
             endtime3 = datetime.now()
+            endtime = datetime.now()
             mydict = {
                 'checker_msg': 'Data tidak ditemukan!',
                 'kata_kunci': str_keyword.replace(" ", ", "),
+                'jumlah_articles': len(temp_df),
                 'waktu1': endtime1-starttime,
                 'waktu2': endtime2-endtime1,
-                'waktu3': endtime3-endtime2
+                'waktu3': endtime3-endtime2,
+                'waktu' : endtime-starttime
             }
             return render(request, 'display_vocab.html', mydict)
 
@@ -178,6 +183,12 @@ def display_vocab(request):
         temp_df['title'] = temp_df['title'].str.upper()
         temp_df['sim_score_preprocessing'] = temp_df['sim_score_preprocessing'].map(
             '{:,.3f}'.format)
+        # temp_df['title_list'] = temp_df['title_list'].apply(lambda x: highlight_search(str_keyword, x))
+        for index, row in temp_df.iterrows():
+            text, same_text = highlight_search(str_keyword, row['title_list'])
+            temp_df.loc[index, "title_list"] = text
+
+        endtime = datetime.now()
         mydict = {
             'df': temp_df[:10].to_html(),
             'DataFrame': temp_df[:10],
@@ -186,20 +197,22 @@ def display_vocab(request):
             'waktu1': endtime1-starttime,
             'waktu2': endtime2-endtime1,
             'waktu3': endtime3-endtime2,
-            'waktu4': endtime4-endtime3
+            'waktu4': endtime4-endtime3,
+            'waktu' : endtime-starttime
         }
         return render(request, 'display_vocab.html', mydict)
     else:
         jumlah_articles = len(df_data)
         df_data = df_data.sort_values(
             by=['id_pub'], ascending=True).reset_index().drop(columns=['index'])[:10]
-        endtime = datetime.now()
         df_data['title'] = df_data['title'].str.upper()
+        endtime = datetime.now()
         mydict = {
             'df': df_data[:10].to_html(),
             'DataFrame': df_data[:10],
             'jumlah_articles': jumlah_articles,
-            'waktu': endtime-starttime
+            'waktu1': endtime-starttime,
+            'waktu' : endtime-starttime
         }
         return render(request, 'display_vocab.html', mydict)
 
@@ -249,49 +262,55 @@ def similar(request, id):
                 dict_val = sken5(article_id, df_data)
                 kelas = 'Peneliti dan Topik'
         endtime2 = datetime.now()
-        if val > 0:
-            if val <= 5:
-                dict_val = dict_val[:10]
-                dict_val['topic_name'] = dict_val['id_pub'].apply(
-                    lambda x: df_data.loc[df_data['id_pub'] == x].topic_name.item())
-                dict_val['subtopic_name'] = dict_val['id_pub'].apply(
-                    lambda x: df_data.loc[df_data['id_pub'] == x].subtopic_name.item())
-                dict_val['researcher_name'] = dict_val['id_pub'].apply(
-                    lambda x: df_data.loc[df_data['id_pub'] == x].researcher_name.item())
+        if val > 0 and val <=5:
+            dict_val = dict_val[:10]
+            dict_val['topic_name'] = dict_val['id_pub'].apply(
+                lambda x: df_data.loc[df_data['id_pub'] == x].topic_name.item())
+            dict_val['subtopic_name'] = dict_val['id_pub'].apply(
+                lambda x: df_data.loc[df_data['id_pub'] == x].subtopic_name.item())
+            dict_val['researcher_name'] = dict_val['id_pub'].apply(
+                lambda x: df_data.loc[df_data['id_pub'] == x].researcher_name.item())
 
-                dict_val['sim_topic_from_name'] = dict_val['sim_idpub_from'].apply(
-                    lambda x: df_data.loc[df_data['id_pub'] == x].topic_name.item())
-                dict_val['sim_subtopic_from_name'] = dict_val['sim_idpub_from'].apply(
-                    lambda x: df_data.loc[df_data['id_pub'] == x].subtopic_name.item())
-                dict_val['sim_researcher_from_name'] = dict_val['sim_idpub_from'].apply(
-                    lambda x: df_data.loc[df_data['id_pub'] == x].researcher_name.item())
+            dict_val['sim_topic_from_name'] = dict_val['sim_idpub_from'].apply(
+                lambda x: df_data.loc[df_data['id_pub'] == x].topic_name.item())
+            dict_val['sim_subtopic_from_name'] = dict_val['sim_idpub_from'].apply(
+                lambda x: df_data.loc[df_data['id_pub'] == x].subtopic_name.item())
+            dict_val['sim_researcher_from_name'] = dict_val['sim_idpub_from'].apply(
+                lambda x: df_data.loc[df_data['id_pub'] == x].researcher_name.item())
 
-                article_search = dict_val.iloc[0].copy()
-                article_search.sim_article_from = article_search.sim_article_from.upper()
+            article_search = dict_val.iloc[0].copy()
+            article_search.sim_article_from = article_search.sim_article_from.upper()
 
-                dict_val['title'] = dict_val['title'].str.upper()
-                dict_val['sim_score'] = dict_val['sim_score'].map(
-                    '{:,.3f}'.format)
-                dict_val['title_list'] = dict_val['title_list'].apply(
-                    lambda x: highlight_search(article_search['sim_art_str_from'], x))
+            dict_val['title'] = dict_val['title'].str.upper()
+            dict_val['sim_score'] = dict_val['sim_score'].map(
+                '{:,.3f}'.format)
 
-                endtime3 = datetime.now()
-                mydict = {
-                    'skenario': val,
-                    'df': dict_val.to_html(),
-                    'article_search': article_search,
-                    'DataFrame': dict_val[:10],
-                    'waktu1': endtime1-starttime,
-                    'waktu2': endtime2-endtime1,
-                    'waktu3': endtime3-endtime2,
-                    'kelas': kelas
-                }
-            else:
-                endtime2 = datetime.now()
-                mydict = {'skenario': val, 'waktu': endtime1-starttime}
+            lst_same = ''
+            for index, row in dict_val.iterrows():
+                text, same_text = highlight_search(
+                    article_search['sim_art_str_from'], row['title_list'])
+                dict_val.loc[index, "title_list"] = text
+                lst_same += same_text
 
+            article_search['sim_art_str_from'], same_text = highlight_search(
+                lst_same, article_search['sim_art_str_from'])
+
+            endtime3 = datetime.now()
+            endtime = datetime.now()
+            mydict = {
+                'skenario': val,
+                'df': dict_val.to_html(),
+                'article_search': article_search,
+                'DataFrame': dict_val[:10],
+                'waktu1': endtime1-starttime,
+                'waktu2': endtime2-endtime1,
+                'waktu3': endtime3-endtime2,
+                'waktu': endtime-starttime,
+                'kelas': kelas
+            }
             return render(request, 'similar.html', mydict)
-    return HttpResponseNotFound('<h1>Page not found</h1>')
+        else:
+            return HttpResponseNotFound('<h1>Page not found</h1>')
 
 
 def get_recommendations_sken1(idx, cosine_sim, indices, df_data):

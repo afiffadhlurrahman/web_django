@@ -19,51 +19,13 @@
         <h1>Pencarian-2 : Pencarian Artikel Tambahan!</h1>
         <h3>dengan Kelas {{kelas}} (Skenario-{{skenario}})</h3>
         <!-- <h1>Similar By Skenario {{skenario}} !</h1> -->
-        <h6>{{ waktu1 }} || {{ waktu2 }} || {{ waktu3 }}</h6>
+        <h6>{{waktu}}</h6>
+        <!-- <h6>{{ waktu1 }} || {{ waktu2 }} || {{ waktu3 }}</h6> -->
     </div>
     <div class="container my-4 post-wrapper">
-        <!-- <h2>Informasi Artikel {{ article_search.sim_idpub_from }} </h2>
-        <form>
-            <div class="form-group row">
-              <label for="staticEmail" class="col-sm-2 col-form-label"><b>Id Artikel</b></label>
-              <div class="col-sm-10">
-                <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{article_search.sim_idpub_from}}">
-              </div>
-            </div>
-            <div class="form-group row">
-                <label for="staticEmail" class="col-sm-2 col-form-label"><b>Judul Artikel</b></label>
-                <div class="col-sm-10">
-                  <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{article_search.sim_article_from}}">
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="staticEmail" class="col-sm-2 col-form-label"><b>Praproses Judul Artikel</b></label>
-                <div class="col-sm-10">
-                  <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{article_search.sim_art_str_from}}">
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="staticEmail" class="col-sm-2 col-form-label"><b>Author Artikel</b></label>
-                <div class="col-sm-10">
-                  <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{article_search.sim_researcher_from_name}}">
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="staticEmail" class="col-sm-2 col-form-label"><b>Topik Artikel</b></label>
-                <div class="col-sm-10">
-                  <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{article_search.sim_topic_from_name}}">
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="staticEmail" class="col-sm-2 col-form-label"><b>Subtopik Artikel</b></label>
-                <div class="col-sm-10">
-                  <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{article_search.sim_subtopic_from_name}}">
-                </div>
-            </div>
-            
-        </form> -->
-
-        <!-- ------------------------------------------- -->
+        <div class="text-right">
+          <button type="button" class="btn btn-primary" onclick="history.back()">Previous Page</button>
+        </div>
 
         <div class="card my-3">
           <div class="card-header">
@@ -71,24 +33,17 @@
                   <li class="nav-item">
                       <a class="nav-link disabled"><b>Informasi Artikel Hasil Pencarian-1</b></a>
                   </li>
-                  <!-- <li>
-                      <a class="btn btn-success text-light" role="button">{{article.sim_score_preprocessing}}</a>
-                      <button type="button" class="btn btn-success">Success</button>
-                      <a class="btn btn-primary">{{article.sim_score_preprocessing}}</a>
-                  </li> -->
-              </ul>
           </div>
           <div class="card-body">
               <h5 class="card-title">Article {{article_search.sim_idpub_from}}</h5>
               <h6 class="card-subtitle mb-2 text-muted">{{article_search.sim_article_from}}</h6>
-              <p class="card-text-inline">{{article_search.sim_art_str_from}}</p>
+              <p class="card-text-inline">{{article_search.sim_art_str_from | safe}}</p>
               <div class="my-2"><a class="card-text-inline" href="{% url 'topic_view'%}"><b>Topik:</b>{{article_search.topic_name}} || <b>Subtopik:</b>{{article_search.subtopic_name}}</a></div>
               <p class="card-text-inline">{{article_search.sim_researcher_from_name}}</p>
               <p class="card-text-inline"></p>
           </div>
         </div>
-        <!-- ------------------------------------------- -->
-        <!-- <span class="highlight"></span> -->
+
         <h2 class="my-3">Hasil Rekomendasi Berdasarkan Skenario {{skenario}}</h2><br>
         <table class="table">
             <thead class="thead-light">
@@ -109,7 +64,6 @@
                 <th scope="row">{{ forloop.counter }}</th>
                 <td>{{ article.id_pub }}</td>
                 <td>{{ article.title }}</td>
-                <!-- <td>{{ article.title_list | safe }}</td> -->
                 <td>{{ article.title_list | safe}}</td>
                 <td>{{ article.researcher_name }}</td>
                 <td>{{ article.topic_name }}</td>

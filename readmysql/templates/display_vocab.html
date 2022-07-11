@@ -5,20 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <!-- <style>
-        .article_content{
-            border: 5px outset red;
-            background-color: lightblue;    
-            text-align: center;
+    <style>
+        .highlight {
+                background-color: yellow;
         }
-    </style> -->
+      </style>
     <title>Display</title>
 </head>
 
 <body class="container my-4 post-wrapper">
     <div class="text-center my-5">
-        <h1>Pencarian-1 : Pencarian Artikel Menggunakan Kata Kunci</h1>
-        <h6>{{waktu1}} || {{waktu2}} || {{waktu3}} || {{waktu4}}</h6>
+        <p class="h1">Pencarian-1 : Pencarian Artikel Menggunakan Kata Kunci</p>
+        <h6>{{waktu}}</h6>
+        <!-- <h6>{{waktu1}} || {{waktu2}} || {{waktu3}} || {{waktu4}}</h6> -->
     </div>
     
     <p>Artikel yang ditampilkan memiliki subtopik semuanya!</p>
@@ -34,8 +33,12 @@
                             <button id="searchBtn" class="btn btn-dark btn-lg" onclick="changeSearchPlaceholder()">Search</button>
                         </div>
                     </div>
+                    <div class="input-group mt-2 ml-3">
+                        <p class="text-secondary">*penulisan kata kunci dipisahkan dengan koma dan jarak satu ketukan</p>
+                    </div>
                 </form>
             </div>
+            
           </div>
         </div>
 
@@ -43,7 +46,7 @@
         <!-- {{df|safe}} -->
     </div>
     <div>
-        <p>Hasil pencarian "{{kata_kunci}}" terdapat {{jumlah_articles}} dari 114708 hasil</p>
+        <p>Hasil pencarian <b>"{{kata_kunci}}"</b> terdapat {{jumlah_articles}} dari 114708 artikel</p>
         
         <h3>{{checker_msg}}</h3>
         {% for article in DataFrame.itertuples %}
@@ -63,7 +66,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Article {{article.id_pub}}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{article.title}}</h6>
-                    <p class="card-text-inline">{{article.title_list}}</p>
+                    <p class="card-text-inline">{{article.title_list | safe}}</p>
                     <div class="my-2"><a class="card-text-inline" href="{% url 'topic_view'%}"><b>Topik:</b>{{article.topic_name}} || <b>Subtopik:</b>{{article.subtopic_name}}</a></div>
                     <p class="card-text-inline">{{article.researcher_name}}</p>
                     <p class="card-text-inline"></p>
